@@ -1,1 +1,18 @@
-!/bin/bash
+#!/bin/bash
+#Ejercicio 4 TP 1 - Sistemas Operativos 
+
+#Chequea que exista el archivo pasado como parametro
+if [ ! -r "$1" ]; then
+	echo "Error: Parametro pasado $1 no es un archivo o no se paso parametro ."
+	echo "Saliendo del script"
+	exit 1
+#chequea que no este vacio el archivo
+elif [ ! -s "$1" ]; then
+	echo "Error: $1 esta vacio o no existe ."
+	echo "Saliendo del script"
+	exit 1
+fi
+
+
+
+
