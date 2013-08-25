@@ -1,17 +1,52 @@
 #!/bin/bash
 #Ejercicio 4 TP 1 - Sistemas Operativos 
 
-#Chequea que exista el archivo pasado como parametro
-if [ ! -r "$1" ]; then
-	echo "Error: Parametro pasado $1 no es un archivo o no se paso parametro ."
-	echo "Saliendo del script"
-	exit 1
+#Funciones de Script
+
+#Funciones de Validaciones
+function validarParametros() {
+#Chequea si el primer parametro es llamada a ayuda
+if [ "$1" = "-?" ]; then
+	msg="Se invoco ayuda de script";
+	return 1;
+#chequea cantidad de parametros pasados
+elif [ "$#" -ne 2 ]; then
+	msg="ERROR: Cantidad de Parametros incorrectos"
+	return 1;	
+#chequea que parametro 1 sea archivo	
+elif  [ ! -f "$1" ]; then
+	msg="ERROR: Parametro pasado $1 no es un archivo"
+	return 1;
 #chequea que no este vacio el archivo
 elif [ ! -s "$1" ]; then
-	echo "Error: $1 esta vacio o no existe ."
-	echo "Saliendo del script"
-	exit 1
+	msg="ERROR: $1 esta vacio o no existe ."
+	return 1;
+#chequea que parametro 2 sea directorio
+elif [ ! -d "$2" ]; then
+	msg="ERROR: $2 no es un directorio"
+	return 1;
 fi
+}
+
+function usage() {
+	echo "#########################################################"
+	echo "# USO DEL SCRIPT:                                       #"
+	echo "# Ejercicio4 param1 param2                              #"
+	echo "# param1 > archivo a procesar                           #"
+	echo "# param2 > directorio donde se guarda archivo resultado #"
+	echo "#########################################################"
+}
+
+#Parte principal de Script
+validarParametros $*
+
+if [ "$?" -eq 1 ]; then
+	echo "$msg"
+	usage
+else
+	echo "no error"
+fi
+
 
 
 
