@@ -1,8 +1,23 @@
 #!/bin/bash
-#prueba
-#Ejercicio 4 TP 1 - Sistemas Operativos 
 
-#Funciones de Script
+#Ejercicio 4 TP 1 - Sistemas Operativos
+#Fecha de Creación: 21/08/2013
+
+#INTEGRANTES DEL GRUPO
+#Sergio Defusto
+#Juan Marcos Bruno
+#Sharon Denise Pesca Alba
+#
+#
+
+#OBJETIVO
+#Transformar un archivo de entrada con datos de clientes en un archivo de salida donde las fechas modifiquen su formato y se agreguen en caso de corresponder nuevos vencimientos con un agregado de 15 días sobre los vencimientos iniciales.
+
+#SINTAXIS: ./clientes.sh [archivo_a_procesar] [ruta_de_archivo_salida]
+
+####################-------------------------------##########################
+
+ #Funciones de Script
 
 #Funciones de Validaciones
 function validarParametros() {
@@ -38,15 +53,36 @@ function usage() {
 	echo "#########################################################"
 }
 
+
+#FUNCION OUTPUT para probar registros en archivo salida
+function output(){
+	
+	#archivo_tmp="/tmp/log_errores";	
+	arch_salida="clientes.out";
+	
+	if test  -s $arch_salida; then
+		clear		
+		echo "resultado en archivo salida";
+		cat $arch_salida;
+		echo
+		#mv "clientes.out" $2; hacer el move.
+	fi
+}
+
 #Parte principal de Script
 validarParametros $*
 
 if [ "$?" -eq 1 ]; then
 	echo "$msg"
-	usage
-else
-	echo "no error"
+	usage	
+elif test -s $1; then
+
+	#SE PROCESA EL ARCHIVO
+	awk -f ej4.awk $1 > clientes.out
+	output 
+
 fi
+
 
 
 
