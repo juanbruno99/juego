@@ -1,0 +1,73 @@
+#!/bin/bash
+#Ejercicio 4 TP 1 - Sistemas Operativos 
+
+#Funciones de Script
+
+#Funciones AWK
+function validarContenidoArchivo() {
+	awk -F ':' ' 
+	{
+	error=0;
+
+	#Valida cantidad de campos por registro sea 2 o registro vacio
+	if (NF != 2 && NF != 0) { error=1; }
+	
+	#Valida unicos nombres de campos permitidos 
+	if ( NF==2  && $1 != "Cliente" && $1 != "Fecha compra" && $1 != "Vencimiento" && $1 != "Segundo Vencimiento" && $1 != "Estado") 		{ error=1; }
+	}
+
+	#Falta hacer: Validar valores de campos permitidos con regular expressions
+
+	END { print error}' $1  
+}
+
+#Funciones de Validaciones
+function validarParametros() {
+#Chequea si el primer parametro es llamada a ayuda
+if [ "$1" = "-?" ]; then
+	msg="Se invoco ayuda de script";
+	return 1;
+#chequea cantidad de parametros pasados
+elif [ "$#" -ne 2 ]; then
+	msg="ERROR: Cantidad de Parametros incorrectos"
+	return 1;	
+#chequea que parametro 1 sea archivo	
+elif  [ ! -f "$1" ]; then
+	msg="ERROR: Parametro pasado $1 no es un archivo"
+	return 1;
+#chequea que no este vacio el archivo
+elif [ ! -s "$1" ]; then
+	msg="ERROR: $1 esta vacio o no existe ."
+	return 1;
+#chequea que parametro 2 sea directorio
+elif [ ! -d "$2" ]; then
+	msg="ERROR: $2 no es un directorio"
+	return 1;
+fi
+}
+
+function usage() {
+	echo "#########################################################"
+	echo "# USO DEL SCRIPT:                                       #"
+	echo "# Ejercicio4 param1 param2                              #"
+	echo "# param1 > archivo a procesar                           #"
+	echo "# param2 > directorio donde se guarda archivo resultado #"
+	echo "#########################################################"
+}
+
+#Parte principal de Script
+validarParametros $*
+
+if [ "$?" -eq 1 ]; then
+	echo "$msg"
+	usage
+else
+	echo "no error"
+	res=`validarContenidoArchivo $1`
+	echo "$res"
+fi
+
+
+
+
+

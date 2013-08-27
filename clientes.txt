@@ -1,0 +1,9 @@
+Cliente: 12121212
+Fecha compra: 12/12/2012
+Vencimiento: 11/11/2013
+Segundo Vencimiento: 10/10/2014
+Estado: Pendiente
+
+Cliente: 12121212
+Fecha compra: 12/12/2012
+Estado: Pagado
