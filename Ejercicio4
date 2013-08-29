@@ -13,28 +13,18 @@ function validarContenidoArchivo() {
 	if (NF != 2 && NF != 0) { error=1; }
 	
 	#Valida unicos nombres de campos permitidos 
-	if ( NF==2  && $1 != "Cliente" && $1 != "Fecha compra" && $1 != "Vencimiento" && $1 != "Segundo Vencimiento" && $1 != "Estado") 		{ error=1; }
+	if ( NF==2  && $1 != "Cliente" && $1 != "Fecha compra" && $1 != "Vencimiento"  && $1 != "Estado") { error=1; }
 	}
 
-	#Falta hacer: Validar valores de campos permitidos con regular expressions
 
 	END { print error }' $1  
 }
 
-#funcion que valida campos que pueden contener fecha
+#funcion que valida campos para archivo de entrada que pueden contener fecha
 function validarFecha() {
-	awk -F ':' ' 
-	error=0;
-	
-	#Setea dias por cada mes calendario
-	BEGIN {mesesDias[1]=31; mesesDias[2]=28; mesesDias[3]=31; mesesDias[4]=30; mesesDias[5]=31; mesesDias[6]=30; mesesDias[7]=31; 
-		mesesDias[8]=31; mesesDias[1]=30; mesesDias[1]=31; mesesDias[1]=30; mesesDias[1]=31;   }
-	
+	awk -F ':' ' BEGIN {error=0;}
 	#Valida formato de fecha de entrada mm/dd/aaaa
-	($1 == "Fecha compra" || $1 == "Vencimiento" || $1 == "Segundo Vencimiento") && $2 ~ /(0[1-9]|1[012])\/(0[1-9]|[12][0-9]|3[01])\/(19|20)[0-9][0-9]/ {
-		print fecha $2
-		
-	}
+	($1 == "Fecha compra" || $1 == "Vencimiento") && $2 !~ /(0[1-9]|1[012])\/(0[1-9]|[12][0-9]|3[01])\/(19|20)[0-9][0-9]/ { error=1; }
 	END { print error }' $1
 }
 
@@ -72,17 +62,33 @@ function usage() {
 	echo "#########################################################"
 }
 
-#Parte principal de Script
+function validaciones() {
 validarParametros $*
-
 if [ "$?" -eq 1 ]; then
 	echo "$msg"
 	usage
+	return 1;
+fi
+res=`validarContenidoArchivo $1`
+res=`validarFecha $1`
+if [ "$res" -eq 1 ]; then
+	echo "Error en contenido de archivo de entrada, formato erroneo en campos o malformado"
+	return 1;
+fi
+
+echo "No hubo errores"
+return 0;
+
+return fail;
+}
+
+
+#Parte principal de Script
+validaciones $*
+if [ $? -eq 1 ]; then
+	exit 1
 else
-	echo "no error"
-	res=`validarContenidoArchivo $1`
-	res=`validarFecha $1`
-	echo "$res"
+	echo "entrando al main"
 fi
 
 
