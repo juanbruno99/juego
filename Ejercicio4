@@ -2,6 +2,42 @@
 #Ejercicio 4 TP 1 - Sistemas Operativos 
 
 #Funciones de Script
+function evaluarEstado()  {
+	awk -F ':' '
+
+	function calcularNuevoVenc() {
+
+	#Inicializo Vector con dias por mes	
+	mesesDias[1]=31; mesesDias[2]=28; mesesDias[3]=31; mesesDias[4]=30; mesesDias[5]=31; mesesDias[6]=30; mesesDias[7]=31; 
+	mesesDias[8]=31; mesesDias[9]=30; mesesDias[10]=31; mesesDias[11]=30; mesesDias[12]=31;
+	
+	#Sumo dias a fecha original
+	dias=fecha[2]+15;mes=fecha[1]+0;anio=fecha[3]
+	
+	if(dias>mesesDias[mes]) {
+	dias=dias-mesesDias[mes]
+	mes++
+		if(mes>12) {
+		mes=1
+		anio=anio+1
+		}
+	}
+	fecha[2]=dias; fecha[1]=mes;fecha[3]=anio
+	}
+
+	$1 ~ /Cliente/ {cliente=$2}
+	$1 ~ /Fecha compra/ {fechaCompra=$2}
+	$1 ~ /Vencimiento/ { #si fecha de vencimiento formato correcto, variable procesar=0, sino 1 y no se procesa en pendiente ni imprime luego
+	fechaVenc = $2
+	}
+
+	$2 ~ /Pendiente/ {
+	split(fechaVenc,fecha,"/")
+	print fecha[2] "/" fecha[1] "/" fecha[3]
+	calcularNuevoVenc()
+	print fecha[2] "/" fecha[1] "/" fecha[3]
+	} ' $1
+}
 
 #Funciones AWK
 function validarContenidoArchivo() {
@@ -87,8 +123,10 @@ return fail;
 validaciones $*
 if [ $? -eq 1 ]; then
 	exit 1
-else
+else {
 	echo "entrando al main"
+	evaluarEstado $1
+}
 fi
 
 
