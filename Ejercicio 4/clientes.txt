@@ -1,0 +1,20 @@
+Cliente: 12121212
+Fecha compra: 31/05/2012
+Vencimiento: 12/20/2012
+Estado: Pendiente
+
+Cliente: 78278239237 
+Fecha compra: 12/13/2012
+Vencimiento: 11/11/2013
+Estado: Pagado 
+
+Cliente: 5665
+Fecha compra: 12/12/2012
+Vencimiento: 33/33/2013
+Estado: PENDiENTe
+
+
+Cliente: 7777
+Fecha compra: 09/25/1999
+Vencimiento: 09/25/1999
+Estado: PENDiENTe
