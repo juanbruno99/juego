@@ -75,11 +75,12 @@ elif test -s $1; then
 
 	#FUNCIONES
 	function esFechaValida(DATO){ #VALIDA FECHAS. FORMATOS ACEPTADOS: MM/DD/AAAA 
-		if(DATO !~ /(0[1-9]|1[012])\/(0[1-9]|[12][0-9]|3[01])\/(19|20)[0-9][0-9]/){
+		if (DATO !~ /(^[ ]?0[1-9]|1[012])\/(0[1-9]|[12][0-9]|3[01])\/(19|20)[0-9][0-9]/) {
 			return 0;
 		}
-		else
+		else 
 			return 1;
+		
 	}
 
 	function cambiarFormatoFecha(DATO){ #RECIBE UNA FECHA CON FORMATO  
