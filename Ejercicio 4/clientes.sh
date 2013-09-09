@@ -72,15 +72,14 @@ elif test -s $1; then
 
 	#SE PROCESA EL ARCHIVO
 	cat $1 | awk '
-
+	
 	#FUNCIONES
 	function esFechaValida(DATO){ #VALIDA FECHAS. FORMATOS ACEPTADOS: MM/DD/AAAA 
 		if (DATO !~ /(^[ ]?0[1-9]|1[012])\/(0[1-9]|[12][0-9]|3[01])\/(19|20)[0-9][0-9]/) {
 			return 0;
 		}
-		else 
+		else
 			return 1;
-		
 	}
 
 	function cambiarFormatoFecha(DATO){ #RECIBE UNA FECHA CON FORMATO  
@@ -121,6 +120,24 @@ elif test -s $1; then
 		return dias "/" mes "/" anio; 
 
 	}
+	
+	function datosExisten(arrayCliente){ #valida que los campos nro_cliente, fecha_compra y fecha_vencimiento esten completos
+		if(length(arrayCliente[1]) < 1 || length(arrayCliente[2]) < 1 || length(arrayCliente[3]) < 1)
+			return 0;
+		return 1;
+	
+	}
+
+	function esClienteValido(DATO){#valida que el cliente sea numérico
+		
+		split(DATO,array,ORS);
+		if(array[1] !~ /^[0-9]+/ && array[1] != "" && array[1] !~ /^[ ]+/)
+			return 0;
+
+		else 
+			return 1; 
+
+	}
 
 	#COMIENZO DEL PROCESO DE ARCHIVO
 	BEGIN{
@@ -136,7 +153,7 @@ elif test -s $1; then
 		#TRABAJO LOS REGISTROS DE NUMERO DE CLIENTE
 		if( $1 ~ /liente/ ) {
 			cliente_valido = 1;
-			if(NF==2)
+			if(NF==2 && esClienteValido($2))
 				arrayCliente[1]= $0; 
 			else
 				cliente_valido = 0;
@@ -166,7 +183,7 @@ elif test -s $1; then
 	
 		#TRABAJO LOS REGISTROS DE ESTADO
 		if($1 ~ /stado/ ){
-			if(cliente_valido && NF==2){
+			if(cliente_valido && datosExisten(arrayCliente) && NF==2 && ($2 ~ /[Pp][eE][nN][dD][iI][eE][nN][Tt][eE]/ || $2 ~ /[Pp][aA][gG][aA][dD][oO]/)){
 				#SI EL CLIENTE ES VALIDO IMPRIMO TODOS LOS DATOS
 				print arrayCliente[1];
 				print arrayCliente[2];
@@ -179,8 +196,12 @@ elif test -s $1; then
 				else { #SINO AGREGO SOLO EL ESTADO
 					print $0 "\n"; 
 				}
-			}else
+			}else{
 				cliente_valido = 1; #limpio la variable para analizar proximo cliente
+				arrayCliente[1]="";
+				arrayCliente[2]="";
+				arrayCliente[3]="";
+			}
 		
 		}
 
@@ -189,7 +210,8 @@ elif test -s $1; then
 	END{ 
 		
 
-	};' > clientes.out
+	}; ' > clientes.out
+	mv clientes.out $HOME; 
 	mv clientes.out $2; 
 	clear		
 	echo "El archivo de salida clientes.out se ha generado en la siguiente ruta: " $2;
