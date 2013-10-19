@@ -1,0 +1,26 @@
+#include "library.hpp"
+#include <pthread.h>
+
+
+//Variables Globales
+extern bool acepto_conexiones;
+int matriz[10][10];
+
+//Threads
+pthread_t hiloEscucha;
+
+//Main Bloque
+int main(int argc, char *argv[]) {
+
+	//Creamos un hilo que se encargue de aceptar las conexiones
+	if(pthread_create(&hiloEscucha,NULL , aceptarConexiones ,(void*) argv[1]) < 0){
+	printf("error");	
+	fprintf(stderr , "Error al crear el hilo que acepta conexiones.\n");
+	exit(0);
+   	}
+
+//pthread_join(hiloEscucha, NULL); descomentar para las conexiones de clientes
+inicializarMatrizPartida(matriz, 10, 10);
+printMatriz(matriz, 10, 10);
+exit(0);
+}
