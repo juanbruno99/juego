@@ -21,15 +21,22 @@
 #include <sys/shm.h>
 #include <sys/ipc.h>
 #include <netdb.h>
+#include <ctype.h>
 
 #define TAMBUF 1024
+#define FIL 10
+#define COL 10
 
 //cosas nuevas a reubicar
 bool fin_partida = false;
+char matriz[FIL][COL]; //Matriz de pantalla de cliente
 
 //Prototipos de funciones
 void establecerConexionConElServidor(char *params[]);
 void cierreAnormal();
+int validarMovimiento(char movimientos[]);
+void bufferAMatriz(char mat[FIL][COL], char buffer[]);
+void printMatriz(char matriz[FIL][COL]); 
 
 unsigned short int comm_port = 0;
 unsigned long int comm_ip_address = 0;
@@ -47,27 +54,35 @@ int main(int argc, char *argv[]) {
 //conexion con el server
 establecerConexionConElServidor(argv);
 
-//Espero el mensaje de me conexion exitosa con el servidor
-recv( caller_socket , buffer, TAMBUF ,0);
-printf("\nMensaje de Server:%s\n", buffer);
+//Espero el mensaje de me conexion exitosa con el servidor - Recibe Matriz inicial de juego de server
+recv( caller_socket , buffer, TAMBUF ,0); //Y la matriz inicial
+//printf("\nMensaje de Server:%s\n", buffer);
 
 //vector que va a guardar las coordenadas ingresadas por el usuario
  char movimientos[25];
   int i;
  
-while(!fin_partida){
+//Recibe y convierte buffer (protoclo), Imprime Matriz de juego recibida al iniciar la partida
+bufferAMatriz(matriz, buffer);
+printf("MATRIZ DE JUEGO:\n");
+printMatriz(matriz);
 
-	printf ("Ingrese las coordenadas de las fichas a develar \n");
-	scanf ("%s",movimientos);
-	/*while(!es_movimiento_valido(movimientos)){ VALIDACION DE LAS COORDENADAS INGRESADAS POR EL USUARIO
-		printf("Datos inválidos, ingrese las coordenadas de las fichas a develar: \n");
-		scanf ("%s",movimientos);	
-	}*/
-	strcpy(buffer,"\0");
-	strncpy( buffer ,movimientos , TAMBUF);
-	if(send( caller_socket , buffer , TAMBUF , 0) < 0){
-		printf("\nNo se pudo enviar el mensaje.\n");
+while(!fin_partida){
+	printf("Ingrese las coordenadas de las fichas a develar con el siguiente formato:\n");
+	printf("X1 Y1 X2 Y2\n");
+	gets(movimientos);
+	//VALIDACION DE LAS COORDENADAS INGRESADAS POR EL USUARIO
+	while(!validarMovimiento(movimientos)){
+		fflush(stdin);
+		printf("Formato ingresado incorrecto, reingrese\n"); 
+		printf("X1 Y1 X2 Y2\n");
+		gets(movimientos);	
 	}
+	//strcpy(buffer,"\0");
+	//strncpy( buffer ,movimientos , TAMBUF);
+	//if(send( caller_socket , buffer , TAMBUF , 0) < 0){
+	//	printf("\nNo se pudo enviar el mensaje.\n");
+	//}
 
 	/*strcpy(buffer,"\0");
 	//recv( caller_socket , buffer, TAMBUF ,0);
@@ -119,4 +134,41 @@ void establecerConexionConElServidor(char *params[])
 	}
 }
 
+int validarMovimiento(char movimientos[]) {
+int ok=1;
 
+	//Cantidad de entradas incorrecta, deben ser 7 incluyendo espacios
+	if(strlen(movimientos)>7) {
+	ok=0;
+	}
+	//Caracteres de coordenadas deben ser numericos y del 0 al 9, funcion isdigit C++
+	if(!(isdigit(movimientos[0]) && isdigit(movimientos[2]) && isdigit(movimientos[4]) && isdigit(movimientos[6])) ) {
+	ok=0;
+	}
+	
+return ok;
+}
+
+void bufferAMatriz(char mat[FIL][COL], char buffer[]) {
+int i, j, k=0;
+
+	for(i=0;i<FIL;i++) {
+		for(j=0;j<COL;j++) {
+			mat[i][j]=buffer[k];
+			k++;		
+		}
+	}
+}
+
+
+void printMatriz(char matriz[FIL][COL]) {
+int i, j;
+
+	for(i=0;i<FIL;i++) {
+		for(j=0;j<COL;j++) {
+			printf("  %d", matriz[i][j]);		
+		}
+		printf("\n");
+	}	
+	
+}

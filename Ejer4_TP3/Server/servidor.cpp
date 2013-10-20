@@ -3,9 +3,10 @@
 
 
 //Variables Globales
-extern bool acepto_conexiones;
-int matriz[10][10];
+extern bool acepto_conexiones; //Flag de Conexiones Entrantes
+extern char matriz[FIL][COL]; //Matriz de Juego, variable global
 extern t_info info; //inicializar los vectores
+char buff[100];
 
 //Threads
 using namespace std;
@@ -24,12 +25,15 @@ int main(int argc, char *argv[]) {
 	//Inicializo estructura t_info
 	inicializarEstructuras();
 
+	inicializarMatrizPartida(matriz, FIL, COL);
+	//printMatriz(matriz, FIL, COL); //pueden removerse los argumentos filas y columnas por las constantes en las funciones
+
 	//Creamos un hilo que se encargue de aceptar las conexiones
 	if(pthread_create(&hiloEscucha,NULL , aceptarConexiones ,(void*) argv[1]) < 0){
-	printf("error");	
 	fprintf(stderr , "Error al crear el hilo que acepta conexiones.\n");
 	exit(0);
    	}
+
 
 	printf("Esperando conexiones . . . \n");
 

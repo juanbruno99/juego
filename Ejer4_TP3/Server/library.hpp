@@ -29,11 +29,14 @@
 #define TAMBUF  1024 //10000
 #define MAXQ 10
 #define CANT_VALORES 50
+#define FIL 10
+#define COL 10
 
 //Variables Externas
 bool acepto_conexiones = true;
 int listen_socket = 0;
 extern 	pthread_t hiloEscucha;
+char matriz[FIL][COL];
 pthread_mutex_t mutex_acepto_conexiones = PTHREAD_MUTEX_INITIALIZER;
 
 
@@ -42,6 +45,8 @@ using namespace std;
 void inicializarJugador(int id , int numSocket);
 void* partidaCliente(void* socket);
 void inicializarEstructuras();
+void matrizABuffer(char mat[FIL][COL], char buffer[]);
+
 //Estructura del Protocolo
 /*typedef struct {
 	short int cord1;
@@ -60,15 +65,16 @@ typedef struct{
 	int cantidadConectados; //Cantidad de clientes conectados en el momento.
 }t_info;
 
+
 t_info  info;
 char buffer[TAMBUF];
 vector<pthread_t> threadVec;
 
 //Prototipos de funciones
 void* aceptarConexiones(void * puerto);
-void inicializarMatrizPartida(int matriz[10][10], unsigned short int filas, unsigned short int columnas);
-void printMatriz(int matriz[10][10], int filas, int columnas);
-void desordenar_matriz(int matriz[10][10], size_t filas, size_t columnas);
+void inicializarMatrizPartida(char matriz[FIL][COL], unsigned short int filas, unsigned short int columnas);
+void printMatriz(char matriz[FIL][COL], int filas, int columnas);
+void desordenar_matriz(char matriz[FIL][COL], size_t filas, size_t columnas);
 
 
 //Funciones Implementacion
@@ -91,7 +97,7 @@ void* aceptarConexiones(void * puerto){
 
 	if(listen_socket < 0){
 		fprintf(stderr , "Error al crear el Socket de Escucha.\n");
-		exit(0);
+		exit(1);
 	}
 
 	setsockopt(listen_socket , SOL_SOCKET , SO_REUSEADDR , &optval, sizeof(optval));
@@ -108,17 +114,19 @@ void* aceptarConexiones(void * puerto){
 
       	if((bind(listen_socket,(struct sockaddr *)&listen_address,sizeof(struct sockaddr)))<0){
 		fprintf(stderr , "Error al asignar la Dirección IP.\n");
-		exit(0);
+		exit(1);
     	}
 
 	//Comenzamos a escuchar conexiones
 	if( (listen(listen_socket,MAXQ)) < 0 ){
 		fprintf(stderr , "Error al escuchar conexiones.\n");
-		exit(0);
+		exit(1);
 	}
 
 	bzero(&con_address,sizeof(con_address));
 	con_addr_len = sizeof(struct sockaddr_in);
+
+	matrizABuffer(matriz,buffer);
 
 	//Aceptamos conexiones
 	while( 1 ){
@@ -129,7 +137,7 @@ void* aceptarConexiones(void * puerto){
 
 		if( acepto_conexiones ){
 			//Le enviamos esto al Cliente
-			strncpy( buffer , "Te has conectado al servidor" , TAMBUF);
+			//strncpy( buffer , "Te has conectado al servidor" , TAMBUF);
 			inicializarJugador(i , comm_socket); //guardamos los datos del jugador
 			printf("Partida asignada al jugador: %d (%d).\n", i , info.clientes[i]);
 			pthread_t threadId;
@@ -155,7 +163,7 @@ void inicializarJugador(int id , int numSocket){
 	info.cantidadConectados++;
 }
 
-void inicializarMatrizPartida(int matriz[10][10], unsigned short int filas, unsigned short int columnas) {
+void inicializarMatrizPartida(char matriz[10][10], unsigned short int filas, unsigned short int columnas) {
 short int i,j, val1,val2,aux1,aux2;
 int count=0;
 
@@ -174,7 +182,7 @@ int count=0;
 	desordenar_matriz(matriz,10,10);
 }
 
-void printMatriz(int matriz[10][10], int filas, int columnas) {
+void printMatriz(char matriz[10][10], int filas, int columnas) {
 int i, j;
 
 	for(i=0;i<10;i++) {
@@ -186,7 +194,7 @@ int i, j;
 	
 }
 
-void desordenar_matriz(int matriz[10][10], size_t filas, size_t columnas) {
+void desordenar_matriz(char matriz[10][10], size_t filas, size_t columnas) {
     if (filas > 1 && columnas > 1){
         size_t i,j;
 	for (i = 0; i < filas - 1; i++){
@@ -205,8 +213,8 @@ void desordenar_matriz(int matriz[10][10], size_t filas, size_t columnas) {
 void* partidaCliente(void* socket){
 //escucho en los sockets de jugadores
 //t_tListenParams* params = (t_tListenParams*) tListenParams;
-	int comm_socket = (int) socket;
-
+	int *socketR = (int*) socket;
+	int comm_socket = *socketR;
 
 	int i,j;
 
@@ -218,7 +226,7 @@ void* partidaCliente(void* socket){
 		if(strcmp(buffer,"\0")!= 0){
 			printf("\nMensaje de cliente %d: %s\n",comm_socket, buffer);
 		}
-		//VER COMO HAGO CUANDO EL CLIENTE TERMINO DE JUGAR YA QUE TENGO QUE SALIR DE ESTE WHILE
+		//VER COMO HAGO CUANDO EL CLIENTE TERMINO DE JUGAR YA QUE TENGO QUE SALIR DE ESTE WHILE - SIGNAL, SIGTERM o SIGUSR
 
 		/*strcpy(buffer,"\0");
 		printf("MENSAJE DSP DE BORRADO: %s M \n",buffer);
@@ -255,4 +263,19 @@ void inicializarEstructuras(){
 	}
 
 	info.cantidadConectados = 0;
+}
+
+void matrizABuffer(char mat[FIL][COL], char buffer[]) {
+int i, j, k=0;
+
+	for(i=0;i<FIL;i++) {
+		for(j=0;j<COL;j++) {
+			buffer[k]=mat[i][j];
+			k++;		
+		}
+	}
+//printf("\n");
+	//Borrar despues, imprime protoclo con matriz hecha vector	
+//	for( i = 0 ; i < 100 ; i++)
+//		printf("%d", buffer[i]);
 }
